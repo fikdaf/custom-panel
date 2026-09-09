@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ table }} - Browse Data</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #222;
+            color: white;
+            padding: 16px 24px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 18px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f0f2f4;
+        }
+
+        a {
+            color: #1769aa;
+        }
+
+        .empty {
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/websites">Websites</a>
+    <a href="/databases">Databases</a>
+    <a href="/logout">Logout</a>
+</header>
+
+<main>
+
+    <div class="card">
+        <h1>Browse Data</h1>
+
+        <p>
+            Database:
+            <strong>{{ database }}</strong>
+        </p>
+
+        <p>
+            Table:
+            <strong>{{ table }}</strong>
+        </p>
+
+<p>
+    <a href="/databases/{{ database }}">
+        ← Back to Database
+    </a>
+    |
+    <a href="/databases/{{ database }}/tables/{{ table }}/structure">
+        Structure
+    </a>
+    |
+<a href="/databases/{{ database }}/tables/{{ table }}/insert">
+    Insert Data
+</a>
+    |
+    <a href="/databases/{{ database }}/tables/{{ table }}/insert">
+        Insert Data
+    </a>
+</p>
+    </div>
+
+    <div class="card">
+        <h2>Rows</h2>
+
+        {% if rows %}
+
+        <table>
+            <thead>
+                <tr>
+                    {% for column in columns %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    {% for value in row %}
+                    <td>
+                        {{ value if value is not none else 'NULL' }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <p class="empty">
+            Table ini belum memiliki data.
+        </p>
+
+        {% endif %}
+    </div>
+
+</main>
+
+</body>
+</html>

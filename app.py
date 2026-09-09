@@ -1456,6 +1456,185 @@ def table_structure(database_name, table_name):
         if conn:
             conn.close()
 
+@app.route(
+    "/databases/<database_name>/tables/<table_name>/browse"
+)
+def browse_table(database_name, table_name):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT TABLE_NAME
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                """,
+                (database_name, table_name)
+            )
+
+            if cursor.fetchone() is None:
+                return "Table tidak ditemukan.", 404
+
+            cursor.execute(
+                f"SELECT * FROM {quote_mysql_identifier(table_name)} LIMIT 100"
+            )
+
+            rows = cursor.fetchall()
+            columns = [desc[0] for desc in cursor.description]
+
+        return render_template(
+            "table_browse.html",
+            database=database_name,
+            table=table_name,
+            columns=columns,
+            rows=rows
+        )
+
+    except Exception as exc:
+        return f"Gagal membaca data table: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
+
+@app.route(
+    "/databases/<database_name>/tables/<table_name>/insert",
+    methods=["GET", "POST"]
+)
+def insert_table_row(database_name, table_name):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    COLUMN_NAME,
+                    COLUMN_TYPE,
+                    IS_NULLABLE,
+                    COLUMN_DEFAULT,
+                    EXTRA
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                ORDER BY ORDINAL_POSITION
+                """,
+                (database_name, table_name)
+            )
+
+            columns = cursor.fetchall()
+
+            if not columns:
+                return "Table tidak ditemukan atau tidak memiliki kolom.", 404
+
+            if request.method == "POST":
+                values = []
+                column_names = []
+
+                for column in columns:
+                    column_name = column[0]
+                    column_type = column[1]
+                    is_nullable = column[2]
+                    column_default = column[3]
+                    extra = column[4]
+
+                    # AUTO_INCREMENT diisi otomatis oleh MariaDB.
+                    if "auto_increment" in extra.lower():
+                        continue
+
+                    value = request.form.get(column_name, "").strip()
+
+                    if value == "":
+                        if column_default is not None or is_nullable == "YES":
+                            values.append(None)
+                            column_names.append(column_name)
+                            continue
+
+                        return (
+                            f"Kolom '{column_name}' wajib diisi.",
+                            400
+                        )
+
+                    values.append(value)
+                    column_names.append(column_name)
+
+                if not column_names:
+                    cursor.execute(
+                        f"INSERT INTO {quote_mysql_identifier(table_name)} () VALUES ()"
+                    )
+                else:
+                    quoted_columns = ", ".join(
+                        quote_mysql_identifier(name)
+                        for name in column_names
+                    )
+
+                    placeholders = ", ".join(
+                        ["%s"] * len(values)
+                    )
+
+                    cursor.execute(
+                        f"""
+                        INSERT INTO {quote_mysql_identifier(table_name)}
+                        ({quoted_columns})
+                        VALUES ({placeholders})
+                        """,
+                        values
+                    )
+
+                return redirect(
+                    f"/databases/{database_name}/tables/{table_name}/browse"
+                )
+
+        return render_template(
+            "table_insert.html",
+            database=database_name,
+            table=table_name,
+            columns=columns
+        )
+
+    except pymysql.err.IntegrityError as exc:
+        return f"Gagal memasukkan data: {exc}", 400
+
+    except pymysql.err.OperationalError as exc:
+        return f"Gagal memasukkan data: {exc}", 400
+
+    except Exception as exc:
+        return f"Gagal memasukkan data: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
+
 @app.route("/databases/<database_name>/delete", methods=["POST"])
 def delete_database(database_name):
     if "user_id" not in session:
