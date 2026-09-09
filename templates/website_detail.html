@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>{{ website["name"] }} - Jayantara Panel</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+        }
+
+        .header a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .online {
+            color: green;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <strong>
+        Jayantara Hosting Panel
+    </strong>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/websites">
+        Websites
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <h1>
+        {{ website["name"] }}
+    </h1>
+
+
+    <div class="card">
+
+        <h2>
+            Website Information
+        </h2>
+
+        <p>
+            <strong>Name:</strong>
+            {{ website["name"] }}
+        </p>
+
+        <p>
+            <strong>Document Root:</strong>
+            {{ website["path"] }}
+        </p>
+            <p>
+                <strong>Port:</strong>
+                {{ website["port"] }}
+            </p>
+
+            <p>
+                <strong>Website URL:</strong>
+                <a href="http://127.0.0.1:{{ website['port'] }}"
+                   target="_blank">
+                    http://127.0.0.1:{{ website["port"] }}
+                </a>
+            </p>
+
+        <p>
+            <strong>Status:</strong>
+
+            <span class="online">
+                ● {{ website["status"] }}
+            </span>
+
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Actions
+        </h2>
+
+	<p>
+     		<p>
+                <a href="http://127.0.0.1:{{ website['port'] }}"
+                   target="_blank">
+                    🌐 Open Website
+                </a>
+            </p>
+
+            <a href="/websites/{{ website['id'] }}/files">
+      	  	📁 Open File Manager
+	 	</a>
+	</p>
+
+<p>
+    <a href="/websites/{{ website['id'] }}/nginx">
+        ⚙️ Nginx Configuration
+    </a>
+</p>
+
+        <p>
+            SSL — coming soon
+        </p>
+
+        <p>
+            Database — coming soon
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

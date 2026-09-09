@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Edit {{ path }}
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 18px 25px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .title {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 600px;
+
+            background: #020617;
+            color: #e2e8f0;
+
+            border: 1px solid #334155;
+            border-radius: 8px;
+
+            padding: 20px;
+
+            font-family:
+                "Courier New",
+                monospace;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            resize: vertical;
+        }
+
+        .actions {
+            margin-top: 15px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+
+            border: none;
+
+            padding: 12px 25px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            font-size: 15px;
+        }
+
+        .back {
+            color: #94a3b8;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+
+        .error {
+            background: #7f1d1d;
+            color: white;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <strong>
+        Jayantara Hosting Panel
+    </strong>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/websites">
+        Websites
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <div class="title">
+
+        <h2>
+            Edit File
+        </h2>
+
+        <div>
+            {{ website["name"] }} /
+            {{ path }}
+        </div>
+
+    </div>
+
+
+    {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+    {% endif %}
+
+
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <textarea
+            name="content"
+            spellcheck="false"
+        >{{ content }}</textarea>
+
+
+        <div class="actions">
+
+            <button type="submit">
+                Save File
+            </button>
+
+            <a
+                class="back"
+                href="/websites/{{ website['id'] }}/files"
+            >
+                ← File Manager
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+
+</html>

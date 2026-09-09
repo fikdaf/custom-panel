@@ -1,0 +1,30 @@
+# Secrets / credentials
+.panel_secret_key
+.mariadb_panel_password
+
+# Runtime / database
+panel.db
+*.db
+*.sqlite
+*.sqlite3
+*.pid
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Logs
+*.log
+logs/
+
+# Local/editor files
+.vscode/
+.idea/
+.DS_Store
+
+# Manual backup files
+*.backup
+*.backup-*
+*.before-*

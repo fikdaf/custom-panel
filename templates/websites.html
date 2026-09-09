@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Websites - Jayantara Panel</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .button {
+            background: #2563eb;
+            color: white;
+            padding: 12px 18px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .website {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .online {
+            color: green;
+            font-weight: bold;
+        }
+
+        .path {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <strong>
+        Jayantara Hosting Panel
+    </strong>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/websites">
+        Websites
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <div class="top">
+
+        <h1>
+            Websites
+        </h1>
+
+        <a
+            class="button"
+            href="/websites/add"
+        >
+            + Add Website
+        </a>
+
+    </div>
+
+
+    {% if websites %}
+
+        {% for website in websites %}
+
+            <div class="website">
+
+                <h2>
+                    {{ website["name"] }}
+                </h2>
+
+                <div class="path">
+                    {{ website["path"] }}
+                </div>
+
+                <p>
+
+                    Status:
+
+                    {% if website["status"] == "active" %}
+
+                        <span class="online">
+                            ● ACTIVE
+                        </span>
+
+                    {% else %}
+
+                        <span>
+                            ● {{ website["status"] }}
+                        </span>
+
+                    {% endif %}
+
+                </p>
+
+                <a href="/websites/{{ website['id'] }}">
+                    Manage
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="website">
+
+            <p>
+                Belum ada website.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+
+</html>

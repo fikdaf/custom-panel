@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ database }} - Database Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #222;
+            color: white;
+            padding: 16px 24px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 18px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        a {
+            color: #1769aa;
+        }
+
+        .danger {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .danger button {
+            background: #b00020;
+            color: white;
+            border: 0;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/websites">Websites</a>
+    <a href="/databases">Databases</a>
+    <a href="/logout">Logout</a>
+</header>
+
+<main>
+    <h1>Database Manager</h1>
+
+    <div class="card">
+        <h2>{{ database }}</h2>
+
+        <p>
+            <a href="/databases">← Back to Databases</a>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Tables</h2>
+
+        {% if tables %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Table</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for table in tables %}
+                <tr>
+                    <td>{{ table[0] }}</td>
+                    <td>{{ table[1] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Database ini belum memiliki table.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Database Actions</h2>
+
+        <div class="danger">
+            <form
+                method="POST"
+                action="/databases/{{ database }}/delete"
+                onsubmit="return confirm('Hapus database {{ database }} beserta seluruh isinya?');"
+            >
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+                <button type="submit">
+                    Delete Database
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

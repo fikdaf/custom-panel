@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Databases - Jayantara Hosting Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #222;
+            color: white;
+            padding: 16px 24px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 18px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        input {
+            padding: 10px;
+            width: 280px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        a {
+            color: #1769aa;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #a00000;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/websites">Websites</a>
+    <a href="/databases">Databases</a>
+    <a href="/logout">Logout</a>
+</header>
+
+<main>
+    <h1>Database Manager</h1>
+
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Create Database</h2>
+
+        <form method="POST" action="/databases/create">
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <input
+                type="text"
+                name="name"
+                placeholder="jayantara_nama"
+                pattern="jayantara_[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}"
+                maxlength="73"
+                required
+            >
+
+            <button type="submit">Create Database</button>
+        </form>
+
+        <p class="hint">
+            Nama database harus diawali <strong>jayantara_</strong>.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Databases</h2>
+
+        {% if databases %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Database</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for database in databases %}
+                <tr>
+                    <td>
+                        <a href="/databases/{{ database }}">
+                            {{ database }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="/databases/{{ database }}">
+                            Manage →
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Belum ada database yang dikelola panel.</p>
+        {% endif %}
+    </div>
+</main>
+
+</body>
+</html>

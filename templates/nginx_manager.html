@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Nginx Manager - {{ website["name"] }}
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .header {
+            background: #111827;
+            padding: 18px 25px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            padding: 25px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 600px;
+
+            background: #020617;
+            color: #e2e8f0;
+
+            border: 1px solid #334155;
+            border-radius: 8px;
+
+            padding: 20px;
+
+            font-family: monospace;
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+        button {
+            margin-top: 15px;
+
+            padding: 12px 25px;
+
+            border: 0;
+            border-radius: 6px;
+
+            background: #2563eb;
+            color: white;
+
+            cursor: pointer;
+        }
+
+        .success {
+            background: #166534;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #991b1b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+
+            white-space: pre-wrap;
+        }
+
+        .info {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <strong>
+        Jayantara Custom Panel
+    </strong>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/websites">
+        Websites
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <h2>
+        Nginx Manager
+    </h2>
+
+    <div class="info">
+
+        <strong>Website:</strong>
+        {{ website["name"] }}
+
+        <br>
+
+        <strong>Document Root:</strong>
+        {{ website["path"] }}
+
+        <br>
+
+        <strong>Config:</strong>
+        {{ nginx_file }}
+
+    </div>
+
+
+    {% if message %}
+
+        <div class="success">
+            {{ message }}
+        </div>
+
+    {% endif %}
+
+
+    {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+    {% endif %}
+
+
+<form
+    method="POST"
+    action="/websites/{{ website['id'] }}/nginx/reload"
+    style="display:inline;"
+>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit">
+        Test & Reload Nginx
+    </button>
+</form>
+
+    <form
+        method="POST"
+        action="/websites/{{ website['id'] }}/nginx/save"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <textarea
+            name="config"
+            spellcheck="false"
+        >{{ config }}</textarea>
+
+
+        <br>
+
+        <button type="submit">
+            Save & Test Nginx
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+
+</html>

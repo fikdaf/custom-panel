@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Add Website - Jayantara Panel</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            color: #64748b;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <strong>
+        Jayantara Hosting Panel
+    </strong>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/websites">
+        Websites
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <h1>
+        Add Website
+    </h1>
+
+
+    <div class="card">
+
+        {% if error %}
+
+            <div class="error">
+                {{ error }}
+            </div>
+
+        {% endif %}
+
+
+        <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <label>
+                Website Name
+            </label>
+
+            <input
+                type="text"
+                name="name"
+                placeholder="contoh: testsite"
+                required
+            >
+
+
+            <p class="info">
+                Website akan dibuat di:
+                /var/www/html/NAMA
+            </p>
+
+
+            <button type="submit">
+                Create Website
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

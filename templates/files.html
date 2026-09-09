@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        File Manager - {{ website["name"] }}
+    </title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .folder {
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+        }
+
+        .back {
+            margin-bottom: 15px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+    <strong>
+        Jayantara Hosting Panel
+    </strong>
+
+    <a href="/dashboard">
+        Dashboard
+    </a>
+
+    <a href="/websites">
+        Websites
+    </a>
+
+    <a href="/logout">
+        Logout
+    </a>
+
+</div>
+
+
+<div class="container">
+
+    <h1>
+        File Manager
+    </h1>
+
+    <p>
+        Website:
+        <strong>
+            {{ website["name"] }}
+        </strong>
+    </p>
+
+
+    <div class="card">
+
+        <strong>
+            Current Path:
+        </strong>
+
+        /
+        {% if current_path %}
+            {{ current_path }}
+        {% endif %}
+
+    </div>
+
+
+    <div class="card">
+
+        {% if current_path %}
+
+            {% set parent = current_path.rsplit('/', 1)[0] %}
+
+            <div class="back">
+
+                <a
+                    href="/websites/{{ website['id'] }}/files?path={{ parent }}"
+                >
+                    ← Parent Folder
+                </a>
+
+            </div>
+
+        {% endif %}
+
+
+        <table>
+
+            <tr>
+
+                <th>
+                    Name
+                </th>
+
+                <th>
+                    Type
+                </th>
+
+                <th>
+                    Size
+                </th>
+
+            </tr>
+
+
+            {% for item in items %}
+
+                <tr>
+
+                    <td>
+
+{% if item.is_dir %}
+
+    <span class="folder">
+        📁
+        <a
+            href="/websites/{{ website['id'] }}/files?path={{ (current_path + '/' if current_path else '') + item.name }}"
+        >
+            {{ item.name }}
+        </a>
+    </span>
+
+
+    <form
+        method="POST"
+        action="/websites/{{ website['id'] }}/files/rename"
+        style="display:inline;margin-left:10px;"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <input
+            type="hidden"
+            name="path"
+            value="{{ current_path }}"
+        >
+
+        <input
+            type="hidden"
+            name="old_name"
+            value="{{ item.name }}"
+        >
+
+        <input
+            type="text"
+            name="new_name"
+            placeholder="Nama baru"
+            required
+        >
+
+        <button type="submit">
+            Rename
+        </button>
+
+    </form>
+
+
+    <form
+        method="POST"
+        action="/websites/{{ website['id'] }}/files/delete"
+        style="display:inline;margin-left:10px;"
+        onsubmit="return confirm('Hapus folder {{ item.name }}? Folder harus kosong.');"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <input
+            type="hidden"
+            name="path"
+            value="{{ current_path }}"
+        >
+
+        <input
+            type="hidden"
+            name="name"
+            value="{{ item.name }}"
+        >
+
+        <button type="submit">
+            Delete
+        </button>
+
+    </form>
+
+
+{% else %}
+
+    📄 {{ item.name }}
+
+    <a
+        href="/websites/{{ website['id'] }}/files/edit?path={{ (current_path + '/' if current_path else '') + item.name }}"
+        style="margin-left:15px;"
+    >
+        Edit
+    </a>
+
+    <form
+        method="POST"
+        action="/websites/{{ website['id'] }}/files/rename"
+        style="display:inline;margin-left:10px;"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <input
+            type="hidden"
+            name="path"
+            value="{{ current_path }}"
+        >
+
+        <input
+            type="hidden"
+            name="old_name"
+            value="{{ item.name }}"
+        >
+
+        <input
+            type="text"
+            name="new_name"
+            placeholder="Nama baru"
+            required
+        >
+
+        <button type="submit">
+            Rename
+        </button>
+
+    </form>
+
+
+    <form
+        method="POST"
+        action="/websites/{{ website['id'] }}/files/delete"
+        style="display:inline;margin-left:10px;"
+        onsubmit="return confirm('Hapus {{ item.name }}?');"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <input
+            type="hidden"
+            name="path"
+            value="{{ current_path }}"
+        >
+
+        <input
+            type="hidden"
+            name="name"
+            value="{{ item.name }}"
+        >
+
+        <button type="submit">
+            Delete
+        </button>
+
+    </form>
+
+{% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if item.is_dir %}
+                            Folder
+                        {% else %}
+                            File
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if item.size is not none %}
+                            {{ item.size }} bytes
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+
+                    <td colspan="3">
+                        Folder kosong
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Create Folder
+        </h2>
+
+        <form
+            method="POST"
+            action="/websites/{{ website['id'] }}/files/mkdir"
+        >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <input
+                type="hidden"
+                name="path"
+                value="{{ current_path }}"
+            >
+
+            <input
+                type="text"
+                name="name"
+                placeholder="Nama folder"
+                required
+            >
+
+            <button type="submit">
+                Create Folder
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Create File
+        </h2>
+
+        <form
+            method="POST"
+            action="/websites/{{ website['id'] }}/files/create"
+        >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <input
+                type="hidden"
+                name="path"
+                value="{{ current_path }}"
+            >
+
+            <input
+                type="text"
+                name="name"
+                placeholder="contoh.html"
+                required
+            >
+
+            <button type="submit">
+                Create File
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
