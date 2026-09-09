@@ -1398,6 +1398,63 @@ def delete_table(database_name, table_name):
 
     return redirect(f"/databases/{database_name}")
 
+@app.route(
+    "/databases/<database_name>/tables/<table_name>/structure"
+)
+def table_structure(database_name, table_name):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    COLUMN_NAME,
+                    COLUMN_TYPE,
+                    IS_NULLABLE,
+                    COLUMN_KEY,
+                    COLUMN_DEFAULT,
+                    EXTRA
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                ORDER BY ORDINAL_POSITION
+                """,
+                (database_name, table_name)
+            )
+
+            columns = cursor.fetchall()
+
+            if not columns:
+                return "Table tidak ditemukan atau tidak memiliki kolom.", 404
+
+        return render_template(
+            "table_structure.html",
+            database=database_name,
+            table=table_name,
+            columns=columns
+        )
+
+    except Exception as exc:
+        return f"Gagal membaca struktur table: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
 
 @app.route("/databases/<database_name>/delete", methods=["POST"])
 def delete_database(database_name):

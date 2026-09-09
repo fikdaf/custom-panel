@@ -168,26 +168,33 @@
                 <tr>
                     <td>{{ table[0] }}</td>
                     <td>{{ table[1] }}</td>
-                     <td>
-        <form
-            method="POST"
-            action="/databases/{{ database }}/tables/{{ table[0] }}/delete"
-            onsubmit="return confirm('Hapus table {{ table[0] }} beserta seluruh isinya?');"
-        >
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-            >
+                    <td>
+    <a
+        href="/databases/{{ database }}/tables/{{ table[0] }}/structure"
+    >
+        Structure
+    </a>
 
-            <button
-                type="submit"
-                class="action-button"
-            >
-                Drop Table
-            </button>
-        </form>
-    </td>
+    <form
+        method="POST"
+        action="/databases/{{ database }}/tables/{{ table[0] }}/delete"
+        onsubmit="return confirm('Hapus table {{ table[0] }} beserta seluruh isinya?');"
+        style="display: inline;"
+    >
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
+
+        <button
+            type="submit"
+            class="action-button"
+        >
+            Drop Table
+        </button>
+    </form>
+</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ table }} - Structure</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: #222;
+            color: white;
+            padding: 16px 24px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 18px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f0f2f4;
+        }
+
+        a {
+            color: #1769aa;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/websites">Websites</a>
+    <a href="/databases">Databases</a>
+    <a href="/logout">Logout</a>
+</header>
+
+<main>
+
+    <div class="card">
+        <h1>Table Structure</h1>
+
+        <p>
+            Database:
+            <strong>{{ database }}</strong>
+        </p>
+
+        <p>
+            Table:
+            <strong>{{ table }}</strong>
+        </p>
+
+        <p>
+            <a href="/databases/{{ database }}">
+                ← Back to Database
+            </a>
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Columns</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Nullable</th>
+                    <th>Key</th>
+                    <th>Default</th>
+                    <th>Extra</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for column in columns %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ column[0] }}</td>
+                    <td>{{ column[1] }}</td>
+                    <td>{{ column[2] }}</td>
+                    <td>{{ column[3] }}</td>
+                    <td>{{ column[4] if column[4] is not none else '' }}</td>
+                    <td>{{ column[5] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+</body>
+</html>
