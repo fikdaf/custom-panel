@@ -121,20 +121,29 @@
                     {% for column in columns %}
                     <th>{{ column }}</th>
                     {% endfor %}
+                     <th>Actions</th>
                 </tr>
             </thead>
 
             <tbody>
-                {% for row in rows %}
-                <tr>
-                    {% for value in row %}
-                    <td>
-                        {{ value if value is not none else 'NULL' }}
-                    </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
+    {% for row in rows %}
+    <tr>
+        {% for value in row %}
+        <td>
+            {{ value if value is not none else 'NULL' }}
+        </td>
+        {% endfor %}
+
+        <td>
+            <a
+                href="/databases/{{ database }}/tables/{{ table }}/edit/{{ row[0] }}"
+            >
+                Edit
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
         </table>
 
         {% else %}

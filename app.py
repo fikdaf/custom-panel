@@ -1634,6 +1634,151 @@ def insert_table_row(database_name, table_name):
     finally:
         if conn:
             conn.close()
+@app.route(
+    "/databases/<database_name>/tables/<table_name>/edit/<path:row_id>",
+    methods=["GET", "POST"]
+)
+def edit_table_row(database_name, table_name, row_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    COLUMN_NAME,
+                    COLUMN_TYPE,
+                    IS_NULLABLE,
+                    COLUMN_DEFAULT,
+                    EXTRA,
+                    COLUMN_KEY
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                ORDER BY ORDINAL_POSITION
+                """,
+                (database_name, table_name)
+            )
+
+            columns = cursor.fetchall()
+
+            if not columns:
+                return "Table tidak ditemukan atau tidak memiliki kolom.", 404
+
+            primary_columns = [
+                column[0]
+                for column in columns
+                if column[5] == "PRI"
+            ]
+
+            if len(primary_columns) != 1:
+                return (
+                    "Edit sementara hanya mendukung table "
+                    "dengan tepat satu primary key.",
+                    400
+                )
+
+            primary_column = primary_columns[0]
+
+            cursor.execute(
+                f"""
+                SELECT *
+                FROM {quote_mysql_identifier(table_name)}
+                WHERE {quote_mysql_identifier(primary_column)} = %s
+                LIMIT 1
+                """,
+                (row_id,)
+            )
+
+            row = cursor.fetchone()
+
+            if row is None:
+                return "Data tidak ditemukan.", 404
+
+            if request.method == "POST":
+                assignments = []
+                values = []
+
+                for index, column in enumerate(columns):
+                    column_name = column[0]
+                    column_type = column[1]
+                    is_nullable = column[2]
+                    column_default = column[3]
+                    extra = column[4]
+
+                    if column_name == primary_column:
+                        continue
+
+                    if "auto_increment" in extra.lower():
+                        continue
+
+                    value = request.form.get(column_name, "").strip()
+
+                    if value == "":
+                        if is_nullable == "YES" or column_default is not None:
+                            value = None
+                        else:
+                            return (
+                                f"Kolom '{column_name}' wajib diisi.",
+                                400
+                            )
+
+                    assignments.append(
+                        f"{quote_mysql_identifier(column_name)} = %s"
+                    )
+                    values.append(value)
+
+                if assignments:
+                    values.append(row_id)
+
+                    cursor.execute(
+                        f"""
+                        UPDATE {quote_mysql_identifier(table_name)}
+                        SET {", ".join(assignments)}
+                        WHERE {quote_mysql_identifier(primary_column)} = %s
+                        """,
+                        values
+                    )
+
+                return redirect(
+                    f"/databases/{database_name}/tables/{table_name}/browse"
+                )
+
+        return render_template(
+            "table_edit.html",
+            database=database_name,
+            table=table_name,
+            columns=columns,
+            row=row,
+            primary_column=primary_column
+        )
+
+    except pymysql.err.IntegrityError as exc:
+        return f"Gagal mengubah data: {exc}", 400
+
+    except pymysql.err.OperationalError as exc:
+        return f"Gagal mengubah data: {exc}", 400
+
+    except Exception as exc:
+        return f"Gagal mengubah data: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
 
 @app.route("/databases/<database_name>/delete", methods=["POST"])
 def delete_database(database_name):
