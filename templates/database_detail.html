@@ -66,6 +66,39 @@
             padding: 10px 16px;
             cursor: pointer;
         }
+
+                .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-row input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .form-row button {
+            background: #1769aa;
+            color: white;
+            border: 0;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .action-button {
+            background: #b00020;
+            color: white;
+            border: 0;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -88,6 +121,36 @@
         </p>
     </div>
 
+        <div class="card">
+        <h2>Create Table</h2>
+
+        <form
+            method="POST"
+            action="/databases/{{ database }}/tables/create"
+        >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <div class="form-row">
+                <input
+                    type="text"
+                    name="table_name"
+                    placeholder="Nama table"
+                    required
+                    pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}"
+                    maxlength="64"
+                >
+
+                <button type="submit">
+                    Create Table
+                </button>
+            </div>
+        </form>
+    </div>
+
     <div class="card">
         <h2>Tables</h2>
 
@@ -97,6 +160,7 @@
                 <tr>
                     <th>Table</th>
                     <th>Type</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -104,6 +168,26 @@
                 <tr>
                     <td>{{ table[0] }}</td>
                     <td>{{ table[1] }}</td>
+                     <td>
+        <form
+            method="POST"
+            action="/databases/{{ database }}/tables/{{ table[0] }}/delete"
+            onsubmit="return confirm('Hapus table {{ table[0] }} beserta seluruh isinya?');"
+        >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <button
+                type="submit"
+                class="action-button"
+            >
+                Drop Table
+            </button>
+        </form>
+    </td>
                 </tr>
                 {% endfor %}
             </tbody>

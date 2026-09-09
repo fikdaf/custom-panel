@@ -137,6 +137,13 @@ def quote_mysql_identifier(identifier):
     return "`" + identifier.replace("`", "``") + "`"
 
 
+def valid_table_name(name):
+    return re.fullmatch(
+        r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}",
+        name
+    ) is not None
+
+
 def get_managed_databases():
     conn = get_mariadb_connection()
 
@@ -1288,6 +1295,56 @@ def database_detail(database_name):
     finally:
         if "conn" in locals() and conn:
             conn.close()
+
+@app.route(
+    "/databases/<database_name>/tables/create",
+    methods=["POST"]
+)
+def create_table(database_name):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    table_name = request.form.get("table_name", "").strip()
+
+    if not valid_table_name(table_name):
+        return (
+            "Nama table tidak valid. Gunakan huruf, angka, "
+            "underscore atau tanda minus.",
+            400
+        )
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                f"""
+                CREATE TABLE {quote_mysql_identifier(table_name)} (
+                    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    PRIMARY KEY (id)
+                ) ENGINE=InnoDB
+                """
+            )
+
+    except pymysql.err.OperationalError as exc:
+        return f"Gagal membuat table: {exc}", 400
+
+    except Exception as exc:
+        return f"Gagal membuat table: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
+
+    return redirect(f"/databases/{database_name}")
 
 
 @app.route("/databases/<database_name>/delete", methods=["POST"])
