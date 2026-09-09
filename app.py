@@ -1876,6 +1876,101 @@ def edit_table_row(database_name, table_name, row_id):
         if conn:
             conn.close()
 
+@app.route(
+    "/databases/<database_name>/tables/<table_name>/delete/<path:row_id>",
+    methods=["POST"]
+)
+def delete_table_row(database_name, table_name, row_id):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    COLUMN_NAME,
+                    COLUMN_KEY
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                ORDER BY ORDINAL_POSITION
+                """,
+                (database_name, table_name)
+            )
+
+            columns = cursor.fetchall()
+
+            if not columns:
+                return "Table tidak ditemukan atau tidak memiliki kolom.", 404
+
+            primary_columns = [
+                column[0]
+                for column in columns
+                if column[1] == "PRI"
+            ]
+
+            if len(primary_columns) != 1:
+                return (
+                    "Delete sementara hanya mendukung table "
+                    "dengan tepat satu primary key.",
+                    400
+                )
+
+            primary_column = primary_columns[0]
+
+            cursor.execute(
+                f"""
+                SELECT 1
+                FROM {quote_mysql_identifier(table_name)}
+                WHERE {quote_mysql_identifier(primary_column)} = %s
+                LIMIT 1
+                """,
+                (row_id,)
+            )
+
+            if cursor.fetchone() is None:
+                return "Data tidak ditemukan.", 404
+
+            cursor.execute(
+                f"""
+                DELETE FROM {quote_mysql_identifier(table_name)}
+                WHERE {quote_mysql_identifier(primary_column)} = %s
+                LIMIT 1
+                """,
+                (row_id,)
+            )
+
+        return redirect(
+            f"/databases/{database_name}/tables/{table_name}/browse"
+        )
+
+    except pymysql.err.IntegrityError as exc:
+        return f"Gagal menghapus data: {exc}", 400
+
+    except pymysql.err.OperationalError as exc:
+        return f"Gagal menghapus data: {exc}", 400
+
+    except Exception as exc:
+        return f"Gagal menghapus data: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
+
 @app.route("/databases/<database_name>/delete", methods=["POST"])
 def delete_database(database_name):
     if "user_id" not in session:

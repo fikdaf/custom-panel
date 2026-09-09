@@ -134,13 +134,27 @@
         </td>
         {% endfor %}
 
-        <td>
-            <a
-                href="/databases/{{ database }}/tables/{{ table }}/edit/{{ row[0] }}"
-            >
-                Edit
-            </a>
-        </td>
+<td>
+    <a
+        href="/databases/{{ database }}/tables/{{ table }}/edit/{{ row[0] }}"
+    >
+        Edit
+    </a>
+
+    <form
+        method="POST"
+        action="/databases/{{ database }}/tables/{{ table }}/delete/{{ row[0] }}"
+        style="display:inline;"
+        onsubmit="return confirm('Yakin ingin menghapus data ini?');"
+    >
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
+        <button type="submit">Delete</button>
+    </form>
+</td>
     </tr>
     {% endfor %}
 </tbody>
