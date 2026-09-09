@@ -91,6 +91,78 @@
         </p>
     </div>
 
+<div class="card">
+    <h2>Add Column</h2>
+
+    <form
+        method="POST"
+        action="/databases/{{ database }}/tables/{{ table }}/columns/add"
+    >
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
+
+        <div style="margin-bottom: 12px;">
+            <label for="column_name">
+                Column Name
+            </label>
+
+            <br>
+
+            <input
+                type="text"
+                id="column_name"
+                name="column_name"
+                required
+                maxlength="64"
+                pattern="[a-zA-Z0-9][a-zA-Z0-9_]{0,63}"
+                placeholder="contoh: name"
+                style="padding: 10px; margin-top: 6px;"
+            >
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label for="column_type">
+                Data Type
+            </label>
+
+            <br>
+
+            <select
+                id="column_type"
+                name="column_type"
+                required
+                style="padding: 10px; margin-top: 6px;"
+            >
+                <option value="VARCHAR(255)">VARCHAR(255)</option>
+                <option value="TEXT">TEXT</option>
+                <option value="INT">INT</option>
+                <option value="BIGINT">BIGINT</option>
+                <option value="DECIMAL(10,2)">DECIMAL(10,2)</option>
+                <option value="DATE">DATE</option>
+                <option value="DATETIME">DATETIME</option>
+                <option value="BOOLEAN">BOOLEAN</option>
+            </select>
+        </div>
+
+        <button
+            type="submit"
+            style="
+                background: #1769aa;
+                color: white;
+                border: 0;
+                padding: 10px 16px;
+                cursor: pointer;
+                border-radius: 4px;
+            "
+        >
+            Add Column
+        </button>
+    </form>
+</div>
+
     <div class="card">
         <h2>Columns</h2>
 

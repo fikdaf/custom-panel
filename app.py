@@ -1457,6 +1457,102 @@ def table_structure(database_name, table_name):
             conn.close()
 
 @app.route(
+    "/databases/<database_name>/tables/<table_name>/columns/add",
+    methods=["POST"]
+)
+def add_table_column(database_name, table_name):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    column_name = request.form.get("column_name", "").strip()
+    column_type = request.form.get("column_type", "").strip().upper()
+
+    if not re.fullmatch(
+        r"[a-zA-Z0-9][a-zA-Z0-9_]{0,63}",
+        column_name
+    ):
+        return "Nama column tidak valid.", 400
+
+    allowed_types = {
+        "VARCHAR(255)",
+        "TEXT",
+        "INT",
+        "BIGINT",
+        "DECIMAL(10,2)",
+        "DATE",
+        "DATETIME",
+        "BOOLEAN",
+    }
+
+    if column_type not in allowed_types:
+        return "Tipe data tidak diizinkan.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT TABLE_NAME
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                """,
+                (database_name, table_name)
+            )
+
+            if cursor.fetchone() is None:
+                return "Table tidak ditemukan.", 404
+
+            cursor.execute(
+                """
+                SELECT COLUMN_NAME
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                  AND COLUMN_NAME = %s
+                """,
+                (database_name, table_name, column_name)
+            )
+
+            if cursor.fetchone() is not None:
+                return "Column sudah ada.", 400
+
+            cursor.execute(
+                f"""
+                ALTER TABLE {quote_mysql_identifier(table_name)}
+                ADD COLUMN {quote_mysql_identifier(column_name)}
+                {column_type}
+                NULL
+                """
+            )
+
+    except pymysql.err.OperationalError as exc:
+        return f"Gagal menambah column: {exc}", 400
+
+    except Exception as exc:
+        return f"Gagal menambah column: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
+
+    return redirect(
+        f"/databases/{database_name}/tables/{table_name}/structure"
+    )
+
+@app.route(
     "/databases/<database_name>/tables/<table_name>/browse"
 )
 def browse_table(database_name, table_name):
