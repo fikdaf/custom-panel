@@ -1749,7 +1749,11 @@ def insert_table_row(database_name, table_name):
                     value = request.form.get(column_name, "").strip()
 
                     if value == "":
-                        if column_default is not None or is_nullable == "YES":
+                        if column_default is not None:
+                            # Omit the column so MariaDB applies its DEFAULT.
+                            continue
+
+                        if is_nullable == "YES":
                             values.append(None)
                             column_names.append(column_name)
                             continue
@@ -1903,7 +1907,13 @@ def edit_table_row(database_name, table_name, row_id):
                     value = request.form.get(column_name, "").strip()
 
                     if value == "":
-                        if is_nullable == "YES" or column_default is not None:
+                        if column_default is not None:
+                            assignments.append(
+                                f"{quote_mysql_identifier(column_name)} = DEFAULT"
+                            )
+                            continue
+
+                        if is_nullable == "YES":
                             value = None
                         else:
                             return (
