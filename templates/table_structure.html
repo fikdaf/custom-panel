@@ -176,6 +176,7 @@
                     <th>Key</th>
                     <th>Default</th>
                     <th>Extra</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
 
@@ -189,6 +190,32 @@
                     <td>{{ column[3] }}</td>
                     <td>{{ column[4] if column[4] is not none else '' }}</td>
                     <td>{{ column[5] }}</td>
+                    <td>
+    {% if column[3] == 'PRI' or 'auto_increment' in column[5]|lower %}
+        <span>Protected</span>
+    {% else %}
+        <form
+            method="POST"
+            action="/databases/{{ database }}/tables/{{ table }}/columns/delete"
+            style="display:inline;"
+            onsubmit="return confirm('Yakin ingin menghapus column {{ column[0] }}?');"
+        >
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+            <input
+                type="hidden"
+                name="column_name"
+                value="{{ column[0] }}"
+            >
+
+            <button type="submit">Drop</button>
+        </form>
+    {% endif %}
+</td>
                 </tr>
                 {% endfor %}
             </tbody>

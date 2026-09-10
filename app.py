@@ -1553,6 +1553,84 @@ def add_table_column(database_name, table_name):
     )
 
 @app.route(
+    "/databases/<database_name>/tables/<table_name>/columns/delete",
+    methods=["POST"]
+)
+def delete_table_column(database_name, table_name):
+    if "user_id" not in session:
+        return redirect("/login")
+
+    if not valid_database_name(database_name):
+        return "Nama database tidak valid.", 400
+
+    if database_name in SYSTEM_DATABASES:
+        return "Database sistem tidak dapat dikelola.", 403
+
+    if not valid_table_name(table_name):
+        return "Nama table tidak valid.", 400
+
+    column_name = request.form.get("column_name", "").strip()
+
+    if not re.fullmatch(
+        r"[a-zA-Z0-9][a-zA-Z0-9_]{0,63}",
+        column_name
+    ):
+        return "Nama column tidak valid.", 400
+
+    conn = None
+
+    try:
+        conn = get_mariadb_connection(database_name)
+
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    COLUMN_NAME,
+                    COLUMN_KEY,
+                    EXTRA
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                  AND COLUMN_NAME = %s
+                """,
+                (database_name, table_name, column_name)
+            )
+
+            column = cursor.fetchone()
+
+            if column is None:
+                return "Column tidak ditemukan.", 404
+
+            if column[1] == "PRI":
+                return "Primary key tidak dapat dihapus.", 400
+
+            if "auto_increment" in column[2].lower():
+                return "Column AUTO_INCREMENT tidak dapat dihapus.", 400
+
+            cursor.execute(
+                f"""
+                ALTER TABLE {quote_mysql_identifier(table_name)}
+                DROP COLUMN {quote_mysql_identifier(column_name)}
+                """
+            )
+
+    except pymysql.err.OperationalError as exc:
+        return f"Gagal menghapus column: {exc}", 400
+
+    except Exception as exc:
+        return f"Gagal menghapus column: {exc}", 500
+
+    finally:
+        if conn:
+            conn.close()
+
+    return redirect(
+        f"/databases/{database_name}/tables/{table_name}/structure"
+    )
+
+
+@app.route(
     "/databases/<database_name>/tables/<table_name>/browse"
 )
 def browse_table(database_name, table_name):
