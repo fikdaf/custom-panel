@@ -1489,6 +1489,9 @@ def delete_table(database_name, table_name):
                 f"DROP TABLE {quote_mysql_identifier(table_name)}"
             )
 
+    except pymysql.err.IntegrityError as exc:
+        return f"Gagal menghapus table: {exc}", 400
+
     except pymysql.err.OperationalError as exc:
         return f"Gagal menghapus table: {exc}", 400
 
