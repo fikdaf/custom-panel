@@ -2063,6 +2063,11 @@ def edit_table_row(database_name, table_name, row_id):
 
                     value = request.form.get(column_name, "")
 
+                    try:
+                        validate_table_value(column_type, value)
+                    except ValueError as exc:
+                        return str(exc), 400
+
                     assignments.append(
                         f"{quote_mysql_identifier(column_name)} = %s"
                     )
