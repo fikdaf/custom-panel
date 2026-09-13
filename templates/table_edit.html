@@ -143,6 +143,7 @@
                     <small>
                         Type: {{ column_type }}
                         | Nullable: {{ is_nullable }}
+                        | Default: {{ column_default if column_default is not none else 'implicit/none' }}
                     </small>
 
                     {% if column_name == primary_column or "auto_increment" in extra.lower() %}
@@ -157,15 +158,28 @@
 
                     {% else %}
 
+                        {% if row[loop.index0] is none %}
+                            {% set current_mode = "NULL" %}
+                        {% else %}
+                            {% set current_mode = "VALUE" %}
+                        {% endif %}
+
                         <input
                             type="text"
                             id="column_{{ loop.index }}"
                             name="{{ column_name }}"
                             value="{{ row[loop.index0] if row[loop.index0] is not none else '' }}"
-                            {% if is_nullable == "NO" and column_default is none %}
-                            required
-                            {% endif %}
                         >
+
+                        <select name="{{ column_name }}__mode">
+                            <option value="VALUE" {% if current_mode == "VALUE" %}selected{% endif %}>Value</option>
+                            {% if is_nullable == "YES" %}
+                            <option value="NULL" {% if current_mode == "NULL" %}selected{% endif %}>NULL</option>
+                            {% endif %}
+                            {% if column_default is not none or is_nullable == "YES" %}
+                            <option value="DEFAULT">DEFAULT</option>
+                            {% endif %}
+                        </select>
 
                     {% endif %}
 

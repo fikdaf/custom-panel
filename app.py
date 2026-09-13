@@ -1765,22 +1765,27 @@ def insert_table_row(database_name, table_name):
                     if "auto_increment" in extra.lower():
                         continue
 
-                    value = request.form.get(column_name, "").strip()
+                    mode = request.form.get(f"{column_name}__mode", "")
+                    if mode not in {"VALUE", "NULL", "DEFAULT"}:
+                        return f"Mode kolom '{column_name}' tidak valid.", 400
+                    if mode == "NULL":
+                        if is_nullable != "YES":
+                            return f"Kolom '{column_name}' tidak boleh NULL.", 400
+                        values.append(None)
+                        column_names.append(column_name)
+                        continue
+                    if mode == "DEFAULT":
+                        if column_default is None and is_nullable != "YES":
+                            return f"Kolom '{column_name}' tidak memiliki DEFAULT.", 400
+                        continue
+                    if (
+                        column_name not in request.form
+                        and is_nullable != "YES"
+                        and column_default is None
+                    ):
+                        return f"Kolom '{column_name}' wajib diisi.", 400
 
-                    if value == "":
-                        if column_default is not None:
-                            # Omit the column so MariaDB applies its DEFAULT.
-                            continue
-
-                        if is_nullable == "YES":
-                            values.append(None)
-                            column_names.append(column_name)
-                            continue
-
-                        return (
-                            f"Kolom '{column_name}' wajib diisi.",
-                            400
-                        )
+                    value = request.form.get(column_name, "")
 
                     values.append(value)
                     column_names.append(column_name)
@@ -1923,22 +1928,32 @@ def edit_table_row(database_name, table_name, row_id):
                     if "auto_increment" in extra.lower():
                         continue
 
-                    value = request.form.get(column_name, "").strip()
+                    mode = request.form.get(f"{column_name}__mode", "")
+                    if mode not in {"VALUE", "NULL", "DEFAULT"}:
+                        return f"Mode kolom '{column_name}' tidak valid.", 400
+                    if mode == "NULL":
+                        if is_nullable != "YES":
+                            return f"Kolom '{column_name}' tidak boleh NULL.", 400
+                        assignments.append(
+                            f"{quote_mysql_identifier(column_name)} = %s"
+                        )
+                        values.append(None)
+                        continue
+                    if mode == "DEFAULT":
+                        if column_default is None and is_nullable != "YES":
+                            return f"Kolom '{column_name}' tidak memiliki DEFAULT.", 400
+                        assignments.append(
+                            f"{quote_mysql_identifier(column_name)} = DEFAULT"
+                        )
+                        continue
+                    if (
+                        column_name not in request.form
+                        and is_nullable != "YES"
+                        and column_default is None
+                    ):
+                        return f"Kolom '{column_name}' wajib diisi.", 400
 
-                    if value == "":
-                        if column_default is not None:
-                            assignments.append(
-                                f"{quote_mysql_identifier(column_name)} = DEFAULT"
-                            )
-                            continue
-
-                        if is_nullable == "YES":
-                            value = None
-                        else:
-                            return (
-                                f"Kolom '{column_name}' wajib diisi.",
-                                400
-                            )
+                    value = request.form.get(column_name, "")
 
                     assignments.append(
                         f"{quote_mysql_identifier(column_name)} = %s"

@@ -133,16 +133,24 @@
                     <small>
                         Type: {{ column[1] }}
                         | Nullable: {{ column[2] }}
+                        | Default: {{ column[3] if column[3] is not none else 'implicit/none' }}
                     </small>
 
                     <input
                         type="text"
                         id="column_{{ loop.index }}"
                         name="{{ column[0] }}"
-                        {% if column[2] == "NO" and column[3] is none %}
-                        required
-                        {% endif %}
                     >
+
+                    <select name="{{ column[0] }}__mode">
+                        <option value="VALUE">Value</option>
+                        {% if column[2] == "YES" %}
+                        <option value="NULL">NULL</option>
+                        {% endif %}
+                        {% if column[3] is not none or column[2] == "YES" %}
+                        <option value="DEFAULT">DEFAULT</option>
+                        {% endif %}
+                    </select>
                 </div>
 
                 {% endif %}
