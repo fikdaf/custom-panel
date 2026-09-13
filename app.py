@@ -1672,12 +1672,31 @@ def browse_table(database_name, table_name):
             rows = cursor.fetchall()
             columns = [desc[0] for desc in cursor.description]
 
+            cursor.execute(
+                """
+                SELECT COLUMN_NAME
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = %s
+                  AND TABLE_NAME = %s
+                  AND COLUMN_KEY = 'PRI'
+                ORDER BY ORDINAL_POSITION
+                """,
+                (database_name, table_name)
+            )
+
+            primary_columns = [column[0] for column in cursor.fetchall()]
+            primary_key_index = None
+
+            if len(primary_columns) == 1:
+                primary_key_index = columns.index(primary_columns[0])
+
         return render_template(
             "table_browse.html",
             database=database_name,
             table=table_name,
             columns=columns,
-            rows=rows
+            rows=rows,
+            primary_key_index=primary_key_index
         )
 
     except Exception as exc:
@@ -1948,7 +1967,8 @@ def edit_table_row(database_name, table_name, row_id):
             table=table_name,
             columns=columns,
             row=row,
-            primary_column=primary_column
+            primary_column=primary_column,
+            row_id=row_id
         )
 
     except pymysql.err.IntegrityError as exc:

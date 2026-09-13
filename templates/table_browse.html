@@ -121,7 +121,9 @@
                     {% for column in columns %}
                     <th>{{ column }}</th>
                     {% endfor %}
-                     <th>Actions</th>
+                    {% if primary_key_index is not none %}
+                    <th>Actions</th>
+                    {% endif %}
                 </tr>
             </thead>
 
@@ -134,16 +136,17 @@
         </td>
         {% endfor %}
 
+{% if primary_key_index is not none %}
 <td>
     <a
-        href="/databases/{{ database }}/tables/{{ table }}/edit/{{ row[0] }}"
+        href="/databases/{{ database }}/tables/{{ table }}/edit/{{ row[primary_key_index] }}"
     >
         Edit
     </a>
 
     <form
         method="POST"
-        action="/databases/{{ database }}/tables/{{ table }}/delete/{{ row[0] }}"
+        action="/databases/{{ database }}/tables/{{ table }}/delete/{{ row[primary_key_index] }}"
         style="display:inline;"
         onsubmit="return confirm('Yakin ingin menghapus data ini?');"
     >
@@ -155,6 +158,7 @@
         <button type="submit">Delete</button>
     </form>
 </td>
+{% endif %}
     </tr>
     {% endfor %}
 </tbody>
