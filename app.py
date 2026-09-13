@@ -1890,6 +1890,11 @@ def insert_table_row(database_name, table_name):
 
                     value = request.form.get(column_name, "")
 
+                    try:
+                        validate_table_value(column_type, value)
+                    except ValueError as exc:
+                        return str(exc), 400
+
                     values.append(value)
                     column_names.append(column_name)
 
