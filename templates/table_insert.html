@@ -112,6 +112,12 @@
     <div class="card">
         <h2>New Row</h2>
 
+        {% if error %}
+        <p style="color: #b00020; font-weight: bold;">
+            {{ error }}
+        </p>
+        {% endif %}
+
         <form
             method="POST"
             action="/databases/{{ database }}/tables/{{ table }}/insert"
@@ -140,15 +146,18 @@
                         type="text"
                         id="column_{{ loop.index }}"
                         name="{{ column[0] }}"
+                        value="{{ form_data.get(column[0], '') if form_data else '' }}"
                     >
 
+                    {% set current_mode = form_data.get(column[0] ~ '__mode', 'VALUE') if form_data else 'VALUE' %}
+
                     <select name="{{ column[0] }}__mode">
-                        <option value="VALUE">Value</option>
+                        <option value="VALUE" {% if current_mode == "VALUE" %}selected{% endif %}>Value</option>
                         {% if column[2] == "YES" %}
-                        <option value="NULL">NULL</option>
+                        <option value="NULL" {% if current_mode == "NULL" %}selected{% endif %}>NULL</option>
                         {% endif %}
                         {% if column[3] is not none or column[2] == "YES" %}
-                        <option value="DEFAULT">DEFAULT</option>
+                        <option value="DEFAULT" {% if current_mode == "DEFAULT" %}selected{% endif %}>DEFAULT</option>
                         {% endif %}
                     </select>
                 </div>

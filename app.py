@@ -1893,7 +1893,14 @@ def insert_table_row(database_name, table_name):
                     try:
                         validate_table_value(column_type, value)
                     except ValueError as exc:
-                        return str(exc), 400
+                        return render_template(
+                            "table_insert.html",
+                            database=database_name,
+                            table=table_name,
+                            columns=columns,
+                            form_data=request.form,
+                            error=str(exc),
+                        ), 400
 
                     values.append(value)
                     column_names.append(column_name)
