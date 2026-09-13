@@ -116,6 +116,12 @@
     <div class="card">
         <h2>Edit Row</h2>
 
+        {% if error %}
+        <p style="color: #b00020; font-weight: bold;">
+            {{ error }}
+        </p>
+        {% endif %}
+
         <form
             method="POST"
             action="/databases/{{ database }}/tables/{{ table }}/edit/{{ row_id }}"
@@ -164,11 +170,18 @@
                             {% set current_mode = "VALUE" %}
                         {% endif %}
 
+                        {% if form_data %}
+                            {% set current_value = form_data.get(column_name, '') %}
+                            {% set current_mode = form_data.get(column_name ~ '__mode', 'VALUE') %}
+                        {% else %}
+                            {% set current_value = row[loop.index0] if row[loop.index0] is not none else '' %}
+                        {% endif %}
+
                         <input
                             type="text"
                             id="column_{{ loop.index }}"
                             name="{{ column_name }}"
-                            value="{{ row[loop.index0] if row[loop.index0] is not none else '' }}"
+                            value="{{ current_value }}"
                         >
 
                         <select name="{{ column_name }}__mode">
@@ -177,7 +190,7 @@
                             <option value="NULL" {% if current_mode == "NULL" %}selected{% endif %}>NULL</option>
                             {% endif %}
                             {% if column_default is not none or is_nullable == "YES" %}
-                            <option value="DEFAULT">DEFAULT</option>
+                            <option value="DEFAULT" {% if current_mode == "DEFAULT" %}selected{% endif %}>DEFAULT</option>
                             {% endif %}
                         </select>
 
