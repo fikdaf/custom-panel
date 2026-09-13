@@ -9,6 +9,8 @@ import re
 import subprocess
 import time
 from pathlib import Path
+from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
 import pymysql
 
 app = Flask(__name__)
@@ -142,6 +144,107 @@ def valid_table_name(name):
         r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}",
         name
     ) is not None
+
+
+def validate_table_value(column_type, value):
+    """Validate a VALUE-mode database value against supported column types."""
+    if not isinstance(value, str):
+        raise ValueError("Nilai harus berupa teks form.")
+
+    normalized_type = column_type.lower().strip()
+
+    if normalized_type == "varchar(255)":
+        if len(value) > 255:
+            raise ValueError("VARCHAR(255) maksimal 255 karakter.")
+        return
+
+    if normalized_type == "text":
+        return
+
+    if normalized_type.startswith("int"):
+        unsigned = "unsigned" in normalized_type
+        try:
+            number = int(value)
+        except ValueError:
+            raise ValueError("INT harus berupa bilangan bulat.")
+
+        minimum = 0 if unsigned else -2147483648
+        maximum = 4294967295 if unsigned else 2147483647
+
+        if not minimum <= number <= maximum:
+            raise ValueError("Nilai INT berada di luar range.")
+        return
+
+    if normalized_type.startswith("bigint"):
+        unsigned = "unsigned" in normalized_type
+        try:
+            number = int(value)
+        except ValueError:
+            raise ValueError("BIGINT harus berupa bilangan bulat.")
+
+        minimum = 0 if unsigned else -9223372036854775808
+        maximum = (
+            18446744073709551615
+            if unsigned
+            else 9223372036854775807
+        )
+
+        if not minimum <= number <= maximum:
+            raise ValueError("Nilai BIGINT berada di luar range.")
+        return
+
+    if normalized_type == "decimal(10,2)":
+        try:
+            number = Decimal(value)
+        except InvalidOperation:
+            raise ValueError("DECIMAL(10,2) harus berupa angka valid.")
+
+        if not number.is_finite():
+            raise ValueError("DECIMAL(10,2) harus berupa angka hingga.")
+
+        sign, digits, exponent = number.as_tuple()
+        fractional_digits = -exponent if exponent < 0 else 0
+
+        if fractional_digits > 2:
+            raise ValueError("DECIMAL(10,2) maksimal 2 angka desimal.")
+
+        integer_digits = max(len(digits) - fractional_digits, 0)
+
+        if integer_digits > 8:
+            raise ValueError(
+                "DECIMAL(10,2) maksimal 8 digit sebelum desimal."
+            )
+        return
+
+    if normalized_type == "date":
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise ValueError("DATE harus berformat YYYY-MM-DD.")
+        try:
+            date.fromisoformat(value)
+        except ValueError:
+            raise ValueError("Tanggal DATE tidak valid.")
+        return
+
+    if normalized_type == "datetime":
+        if not re.fullmatch(
+            r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}",
+            value,
+        ):
+            raise ValueError(
+                "DATETIME harus berformat YYYY-MM-DD HH:MM:SS."
+            )
+        try:
+            datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            raise ValueError("Nilai DATETIME tidak valid.")
+        return
+
+    if normalized_type in {"boolean", "tinyint(1)"}:
+        if value not in {"0", "1"}:
+            raise ValueError("BOOLEAN hanya menerima 0 atau 1.")
+        return
+
+    raise ValueError(f"Tipe data '{column_type}' tidak didukung.")
 
 
 def get_managed_databases():
