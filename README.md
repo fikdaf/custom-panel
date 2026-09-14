@@ -643,7 +643,39 @@ logs/
 backup files
 ```
 
+
 ---
+
+## Milestone 5 — Production Hardening
+
+**Status: DONE**
+
+### Security Hardening
+
+* [x] Sanitize database error responses.
+* [x] Review authentication and session handling.
+* [x] Review CSRF protection on protected routes.
+* [x] Review database route security.
+* [x] Validate filesystem path safety.
+* [x] Verify sensitive file permissions.
+* [x] Verify sensitive files are not tracked by Git.
+* [x] Review MariaDB panel-user privileges.
+
+### Production Runtime
+
+* [x] Review Gunicorn binding and worker configuration.
+* [x] Review Nginx reverse proxy configuration.
+* [x] Verify Nginx → Gunicorn runtime.
+* [x] Verify Gunicorn logging.
+* [x] Run final regression smoke tests.
+* [x] Complete Release Candidate audit.
+
+### Notes
+
+* Database exception details are no longer returned directly to users.
+* Composite primary keys are safely rejected by the current Edit/Delete implementation.
+* Password/session lifecycle was reviewed; no blocking authentication defect was identified.
+* MariaDB panel access remains scoped to the `jayantara_%` database namespace.
 
 # Current Development Status
 
