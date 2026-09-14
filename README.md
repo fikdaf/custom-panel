@@ -429,7 +429,7 @@ Branch tersebut digunakan sebagai checkpoint pengembangan sebelum perubahan siap
 
 ## Milestone 4 — Database Manager Phase 2
 
-**Status: IN PROGRESS**
+**Status: DONE**
 
 ### Table Management
 
@@ -451,16 +451,16 @@ Branch tersebut digunakan sebagai checkpoint pengembangan sebelum perubahan siap
 * [x] Edit row.
 * [x] Delete row.
 
-### Remaining validation
+### Validation
 
-* [ ] Comprehensive negative testing.
-* [ ] Foreign key behavior testing.
-* [ ] Multiple-column primary key handling.
-* [ ] Edge-case testing for unusual schemas.
-* [ ] Error handling review.
-* [ ] UI consistency review.
-* [ ] Security review of all database routes.
-* [ ] Regression testing.
+* [x] Comprehensive negative testing.
+* [x] Foreign key behavior testing.
+* [x] Multiple-column primary key handling.
+* [x] Edge-case testing for unusual schemas.
+* [x] Error handling review.
+* [x] UI consistency review.
+* [x] Security review of all database routes.
+* [x] Regression testing.
 
 ---
 
