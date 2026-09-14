@@ -1393,7 +1393,7 @@ def database_detail(database_name):
         )
 
     except Exception as exc:
-        return f"Gagal membaca database: {exc}", 500
+        return "Gagal membaca database. Silakan coba lagi.", 500
 
     finally:
         if "conn" in locals() and conn:
@@ -1438,10 +1438,10 @@ def create_table(database_name):
             )
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal membuat table: {exc}", 400
+        return "Gagal membuat table. Silakan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal membuat table: {exc}", 500
+        return "Gagal membuat table. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -1490,13 +1490,13 @@ def delete_table(database_name, table_name):
             )
 
     except pymysql.err.IntegrityError as exc:
-        return f"Gagal menghapus table: {exc}", 400
+        return "Gagal menghapus table. Silakan coba lagi.", 400
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal menghapus table: {exc}", 400
+        return "Gagal menghapus table. Silakan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal menghapus table: {exc}", 500
+        return "Gagal menghapus table. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -1556,7 +1556,7 @@ def table_structure(database_name, table_name):
         )
 
     except Exception as exc:
-        return f"Gagal membaca struktur table: {exc}", 500
+        return "Gagal membaca struktur table. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -1645,10 +1645,10 @@ def add_table_column(database_name, table_name):
             )
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal menambah column: {exc}", 400
+        return "Gagal menambah column. Silakan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal menambah column: {exc}", 500
+        return "Gagal menambah column. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -1722,10 +1722,10 @@ def delete_table_column(database_name, table_name):
             )
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal menghapus column: {exc}", 400
+        return "Gagal menghapus column. Silakan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal menghapus column: {exc}", 500
+        return "Gagal menghapus column. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -1806,7 +1806,7 @@ def browse_table(database_name, table_name):
         )
 
     except Exception as exc:
-        return f"Gagal membaca data table: {exc}", 500
+        return "Gagal membaca data table. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -1943,13 +1943,13 @@ def insert_table_row(database_name, table_name):
         )
 
     except pymysql.err.IntegrityError as exc:
-        return f"Gagal memasukkan data: {exc}", 400
+        return "Gagal memasukkan data. Silakan periksa data dan coba lagi.", 400
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal memasukkan data: {exc}", 400
+        return "Gagal memasukkan data. Silakan periksa data dan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal memasukkan data: {exc}", 500
+        return "Gagal memasukkan data. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -2120,13 +2120,13 @@ def edit_table_row(database_name, table_name, row_id):
         )
 
     except pymysql.err.IntegrityError as exc:
-        return f"Gagal mengubah data: {exc}", 400
+        return "Gagal mengubah data. Silakan periksa data dan coba lagi.", 400
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal mengubah data: {exc}", 400
+        return "Gagal mengubah data. Silakan periksa data dan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal mengubah data: {exc}", 500
+        return "Gagal mengubah data. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -2215,13 +2215,13 @@ def delete_table_row(database_name, table_name, row_id):
         )
 
     except pymysql.err.IntegrityError as exc:
-        return f"Gagal menghapus data: {exc}", 400
+        return "Gagal menghapus data. Silakan coba lagi.", 400
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal menghapus data: {exc}", 400
+        return "Gagal menghapus data. Silakan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal menghapus data: {exc}", 500
+        return "Gagal menghapus data. Silakan coba lagi.", 500
 
     finally:
         if conn:
@@ -2252,10 +2252,10 @@ def delete_database(database_name):
             )
 
     except pymysql.err.OperationalError as exc:
-        return f"Gagal menghapus database: {exc}", 400
+        return "Gagal menghapus database. Silakan coba lagi.", 400
 
     except Exception as exc:
-        return f"Gagal menghapus database: {exc}", 500
+        return "Gagal menghapus database. Silakan coba lagi.", 500
 
     finally:
         if conn:
