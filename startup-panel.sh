@@ -4,8 +4,34 @@ set -e
 
 echo "=== Starting MariaDB ==="
 
-if service mariadb status >/dev/null 2>&1; then
-    echo "MariaDB sudah berjalan."
+if /opt/custom-panel/venv/bin/python - <<'PYTHON' >/dev/null 2>&1
+import pymysql
+from pathlib import Path
+
+password_file = Path("/opt/custom-panel/.mariadb_panel_password")
+if not password_file.exists():
+    raise SystemExit(1)
+
+password = password_file.read_text().strip()
+if not password:
+    raise SystemExit(1)
+
+conn = pymysql.connect(
+    unix_socket="/run/mysqld/mysqld.sock",
+    user="jayantara_panel",
+    password=password,
+    charset="utf8mb4",
+    autocommit=True,
+    connect_timeout=3,
+)
+
+with conn.cursor() as cur:
+    cur.execute("SELECT 1")
+
+conn.close()
+PYTHON
+then
+    echo "MariaDB sudah berjalan dan dapat diakses panel."
 else
     service mariadb start
     echo "MariaDB berhasil dijalankan."
@@ -39,7 +65,37 @@ echo
 echo "=== Service Status ==="
 
 echo "MariaDB:"
-service mariadb status || true
+if /opt/custom-panel/venv/bin/python - <<'PYTHON' >/dev/null 2>&1
+import pymysql
+from pathlib import Path
+
+password_file = Path("/opt/custom-panel/.mariadb_panel_password")
+if not password_file.exists():
+    raise SystemExit(1)
+
+password = password_file.read_text().strip()
+if not password:
+    raise SystemExit(1)
+
+conn = pymysql.connect(
+    unix_socket="/run/mysqld/mysqld.sock",
+    user="jayantara_panel",
+    password=password,
+    charset="utf8mb4",
+    autocommit=True,
+    connect_timeout=3,
+)
+
+with conn.cursor() as cur:
+    cur.execute("SELECT 1")
+
+conn.close()
+PYTHON
+then
+    echo "RUNNING — dapat diakses panel"
+else
+    echo "UNAVAILABLE — tidak dapat diakses panel"
+fi
 
 echo
 echo "PHP-FPM:"
