@@ -464,89 +464,109 @@ Branch tersebut digunakan sebagai checkpoint pengembangan sebelum perubahan siap
 
 ---
 
-# Milestone 5 — Production Hardening
+## Milestone 5 — Production Hardening
 
-**Status: PLANNED**
+**Status: DONE**
 
-Before Custom Panel is considered ready for real operational use:
+### Security Hardening
 
-### Application
+* [x] Full route audit.
+* [x] Input validation audit.
+* [x] CSRF audit.
+* [x] Authentication/authorization audit.
+* [x] Session security review.
+* [x] Error handling review.
+* [x] Logging review.
+* [x] Remove debug/development behavior.
+* [x] Database operation regression testing.
+* [x] Transaction/error handling review.
+* [x] Schema edge-case testing.
+* [x] Permission boundary testing.
+* [x] Destructive-operation safeguards.
+* [x] Nginx configuration audit.
+* [x] Invalid configuration rollback testing.
+* [x] Port collision testing.
+* [x] Reload/runtime failure testing.
+* [x] File path traversal and permission review.
 
-* [ ] Full route audit.
-* [ ] Full input validation audit.
-* [ ] CSRF audit.
-* [ ] Authentication/authorization audit.
-* [ ] Session security review.
-* [ ] Error handling review.
-* [ ] Logging review.
-* [ ] Remove debug/development behavior.
+### Production Runtime
 
-### Database
+* [x] Gunicorn binding and worker configuration reviewed.
+* [x] Nginx reverse proxy configuration reviewed.
+* [x] Nginx → Gunicorn runtime verified.
+* [x] Gunicorn logging reviewed.
+* [x] Final regression smoke tests completed.
+* [x] Release Candidate security audit completed.
 
-* [ ] Database operation regression tests.
-* [ ] Transaction/error handling review.
-* [ ] Schema edge-case tests.
-* [ ] Permission boundary testing.
-* [ ] Destructive-operation safeguards.
+### Notes
 
-### Nginx
-
-* [ ] Configuration generation audit.
-* [ ] Invalid configuration rollback test.
-* [ ] Website deletion cleanup test.
-* [ ] Port collision testing.
-* [ ] Reload failure testing.
-
-### File Manager
-
-* [ ] Path traversal testing.
-* [ ] Permission/error testing.
-* [ ] Large file behavior testing.
-* [ ] Dangerous file operation review.
-
----
-
-# Milestone 6 — Operational Reliability
-
-**Status: PLANNED**
-
-* [ ] Clean startup sequence.
-* [ ] Gunicorn process management verified.
-* [ ] Nginx startup verified.
-* [ ] MariaDB startup verified.
-* [ ] Restart/recovery testing.
-* [ ] Service health checks.
-* [ ] Backup procedure.
-* [ ] Restore procedure.
-* [ ] Configuration backup.
-* [ ] Database backup.
-* [ ] Git checkpoint procedure.
+* Database exception details are no longer returned directly to users.
+* Composite primary keys are safely rejected by the current Edit/Delete implementation.
+* Password/session lifecycle was reviewed; no blocking authentication defect was identified.
+* MariaDB panel access remains scoped to the `jayantara_%` database namespace.
 
 ---
 
-# Milestone 7 — Release Candidate
+## Milestone 6 — Operational Reliability
 
-**Status: PLANNED**
+**Status: DONE**
 
-Custom Panel dapat dinyatakan **Release Candidate** setelah:
+* [x] Clean startup sequence.
+* [x] Gunicorn process management verified.
+* [x] Nginx startup verified.
+* [x] MariaDB startup and panel connectivity verified.
+* [x] PHP-FPM startup/recovery verified.
+* [x] Restart/recovery testing.
+* [x] Service health checks.
+* [x] SQLite backup and restore procedure tested.
+* [x] MariaDB backup and restore procedure tested.
+* [x] Configuration consistency verified.
+* [x] Git checkpoint procedure verified.
+* [x] Log rotation configuration verified.
+* [x] Startup idempotency verified.
 
-* [ ] Semua fitur utama selesai.
-* [ ] Tidak ada known critical bug.
-* [ ] Security audit selesai.
-* [ ] Database Manager selesai.
-* [ ] Website Manager selesai.
-* [ ] File Manager selesai.
-* [ ] Nginx Manager selesai.
-* [ ] Restart/recovery berhasil diuji.
-* [ ] Backup dan restore berhasil diuji.
-* [ ] Production configuration diverifikasi.
-* [ ] Repository bersih.
-* [ ] Semua perubahan penting sudah di-commit.
-* [ ] Release candidate checkpoint tersedia di GitHub.
+### Notes
+
+* Gunicorn, Nginx, PHP-FPM, and MariaDB recovery behavior was tested.
+* MariaDB forced-stop simulation was limited by the PRoot runtime because the `mariadbd-safe` parent kept the daemon alive; application connectivity and startup/recovery behavior were nevertheless verified.
+* SQLite and MariaDB backup/restore procedures were successfully tested.
+* Gunicorn log rotation and log reopening via `SIGUSR1` were verified.
 
 ---
 
-# Milestone 8 — Production Ready
+## Milestone 7 — Release Candidate
+
+**Status: CURRENT**
+
+Custom Panel is in the Release Candidate audit phase.
+
+### Release Candidate Checklist
+
+* [x] Semua fitur utama selesai.
+* [x] Security audit selesai.
+* [x] Database Manager selesai.
+* [x] Website Manager selesai.
+* [x] File Manager baseline selesai.
+* [x] Nginx Manager selesai.
+* [x] Restart/recovery berhasil diuji.
+* [x] Backup dan restore berhasil diuji.
+* [x] Production configuration diverifikasi.
+* [x] Repository bersih.
+* [x] Dependency audit selesai.
+* [x] Static application audit selesai.
+* [x] HTTP endpoint dan authentication smoke test selesai.
+* [x] CSRF enforcement test selesai.
+* [x] Database CRUD regression test selesai.
+* [x] Database/table management regression test selesai.
+* [x] Nginx configuration audit selesai.
+* [x] Permission and ownership audit selesai.
+* [x] SQLite integrity and production data audit selesai.
+* [x] Final runtime and service consistency audit selesai.
+* [ ] Release Candidate checkpoint dibuat.
+
+---
+
+## Milestone 8 — Production Ready
 
 **Status: NOT READY**
 
@@ -569,23 +589,6 @@ Custom Panel baru dianggap **siap digunakan** apabila seluruh checklist berikut 
 [ ] Git repository clean
 [ ] Production configuration verified
 [ ] Release checkpoint created
-```
-
-Target akhir:
-
-```text
-CUSTOM PANEL
-     │
-     ├── Authentication       ✓
-     ├── Website Manager      ✓
-     ├── File Manager         ✓
-     ├── Nginx Manager        ✓
-     ├── Database Manager     → hardening
-     ├── Security             → audit
-     ├── Reliability          → testing
-     └── Production Release   → pending
-```
-
 ---
 
 # Development Rules
@@ -646,37 +649,6 @@ backup files
 
 ---
 
-## Milestone 5 — Production Hardening
-
-**Status: DONE**
-
-### Security Hardening
-
-* [x] Sanitize database error responses.
-* [x] Review authentication and session handling.
-* [x] Review CSRF protection on protected routes.
-* [x] Review database route security.
-* [x] Validate filesystem path safety.
-* [x] Verify sensitive file permissions.
-* [x] Verify sensitive files are not tracked by Git.
-* [x] Review MariaDB panel-user privileges.
-
-### Production Runtime
-
-* [x] Review Gunicorn binding and worker configuration.
-* [x] Review Nginx reverse proxy configuration.
-* [x] Verify Nginx → Gunicorn runtime.
-* [x] Verify Gunicorn logging.
-* [x] Run final regression smoke tests.
-* [x] Complete Release Candidate audit.
-
-### Notes
-
-* Database exception details are no longer returned directly to users.
-* Composite primary keys are safely rejected by the current Edit/Delete implementation.
-* Password/session lifecycle was reviewed; no blocking authentication defect was identified.
-* MariaDB panel access remains scoped to the `jayantara_%` database namespace.
-
 # Current Development Status
 
 Saat README ini dibuat, Custom Panel telah memiliki:
@@ -689,7 +661,7 @@ Saat README ini dibuat, Custom Panel telah memiliki:
 * Database Manager Phase 1.
 * Database Manager Phase 2 untuk table, column, dan row management.
 
-Fokus pengembangan berikutnya adalah **testing, security hardening, regression testing, dan reliability** sebelum masuk ke tahap Production Ready.
+Fokus saat ini adalah menyelesaikan **Release Candidate audit**, memastikan tidak ada regression atau blocker yang tersisa, dan menyiapkan checkpoint release sebelum evaluasi Production Ready.
 
 ---
 
